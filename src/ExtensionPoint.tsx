@@ -10,13 +10,19 @@ export const ExtensionPoint = ({
 }: {
   extensionPoint: string;
 }) => {
+  const [isLoading, setIsLoading] = React.useState(true);
   const [plugins, setPlugins] = React.useState<Manifest[]>([]);
 
   React.useEffect(() => {
     getPluginsForExtensionPoint(extensionPoint).then((plugins) => {
+      setIsLoading(false);
       setPlugins(plugins);
     });
   }, []);
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
 
   if (plugins.length == 0) {
     // TODO: Must be replaced, not found should not be displayed.

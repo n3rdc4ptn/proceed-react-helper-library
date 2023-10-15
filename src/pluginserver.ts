@@ -3,7 +3,7 @@
 import { Manifest } from "./manifest";
 
 export const pluginServer =
-  process.env.PLUGIN_SERVER || "http://localhost:3000";
+  process.env.PLUGIN_SERVER || "http://localhost:3333";
 
 /// Returns a list of all plugins by fetching the plugin server
 export async function getPlugins() {
