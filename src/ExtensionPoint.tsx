@@ -44,24 +44,22 @@ export const ExtensionPoint = ({
   }
 
   return (
-    <div>
+    <>
       {modules.map(({ module, plugin }) => (
-        <DynamicComponent
-          key={`${plugin.bundle}-${module.module}`}
-          plugin={plugin}
-          module={module}
-        ></DynamicComponent>
+        <DynamicComponent plugin={plugin} module={module}></DynamicComponent>
       ))}
-    </div>
+    </>
   );
 };
 
-const DynamicComponent = ({
-  plugin,
-  module,
-}: {
+interface DynamicComponentProps {
   plugin: Manifest;
   module: Module;
+}
+
+const DynamicComponent: React.FC<DynamicComponentProps> = ({
+  plugin,
+  module,
 }) => {
   const url = `${pluginServer}/plugins/${plugin.bundle}/remoteEntry.js`;
   const scope = plugin.name;
