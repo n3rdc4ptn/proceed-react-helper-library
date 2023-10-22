@@ -3,7 +3,7 @@
 import * as React from "react";
 import { useFederatedComponent } from "./dynamic-module";
 import { getPluginsForExtensionPoint, pluginServer } from "./pluginserver";
-import { Manifest, Module } from "./manifest";
+import { Manifest, Module } from "proceed-plugin-core-library";
 
 export const ExtensionPoint = ({
   extensionPoint,

@@ -1,6 +1,6 @@
 /// This file is responsible for the connection to the pluginServer
 
-import { Manifest } from "./manifest";
+import { Manifest } from "proceed-plugin-core-library";
 
 export const pluginServer =
   process.env.PLUGIN_SERVER || "http://localhost:3333";
