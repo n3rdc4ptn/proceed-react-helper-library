@@ -1,14 +1,35 @@
 "use client";
 
 import * as React from "react";
-import { useFederatedComponent } from "./dynamic-module";
 import { getPluginsForExtensionPoint, pluginServer } from "./pluginserver";
-import { Manifest, Module } from "proceed-plugin-core-library";
+import {
+  Manifest,
+  Module,
+  PluginUIContext,
+  PluginUIContextData,
+} from "proceed-plugin-core-library";
+import { DynamicComponent } from "./DynamicComponent";
 
-export const ExtensionPoint = ({
+type ModuleWithManifest = {
+  module: Module;
+  plugin: Manifest;
+};
+
+const ExtensionModuleContext = React.createContext<
+  | ({
+      context: PluginUIContext;
+    } & ModuleWithManifest)
+  | null
+>(null);
+
+const ExtensionPoint = ({
   extensionPoint,
+  data,
+  children,
 }: {
   extensionPoint: string;
+  data: PluginUIContextData;
+  children?: React.ReactNode;
 }) => {
   const [isLoading, setIsLoading] = React.useState(true);
   const [plugins, setPlugins] = React.useState<Manifest[]>([]);
@@ -29,10 +50,7 @@ export const ExtensionPoint = ({
     return <div>No Plugin found.</div>;
   }
 
-  let modules: {
-    module: Module;
-    plugin: Manifest;
-  }[] = [];
+  let modules: ModuleWithManifest[] = [];
   for (let plugin of plugins) {
     modules = [
       ...modules,
@@ -43,37 +61,61 @@ export const ExtensionPoint = ({
     ];
   }
 
+  const context: PluginUIContext = {
+    extensionpoint: extensionPoint,
+    data,
+  };
+
+  if (children) {
+    return (
+      <>
+        {modules.map((module, index) => (
+          <ExtensionModuleContext.Provider
+            key={index}
+            value={{
+              ...module,
+              context,
+            }}
+          >
+            {children}
+          </ExtensionModuleContext.Provider>
+        ))}
+      </>
+    );
+  }
+
   return (
     <>
       {modules.map(({ module, plugin }) => (
-        <DynamicComponent plugin={plugin} module={module}></DynamicComponent>
+        <DynamicComponent
+          key={`${extensionPoint}-${plugin.name}-${module.module}`}
+          context={context}
+          plugin={plugin}
+          module={module}
+        ></DynamicComponent>
       ))}
     </>
   );
 };
 
-interface DynamicComponentProps {
-  plugin: Manifest;
-  module: Module;
-}
+const ExtensionPointContent = ({}) => {
+  const data = React.useContext(ExtensionModuleContext);
 
-const DynamicComponent: React.FC<DynamicComponentProps> = ({
-  plugin,
-  module,
-}) => {
-  const url = `${pluginServer}/plugins/${plugin.bundle}/remoteEntry.js`;
-  const scope = plugin.name;
-  const moduleName = module.module ?? "";
-
-  const { Component: DynComponent } = useFederatedComponent(
-    url,
-    scope,
-    moduleName
-  );
-
-  if (!DynComponent) {
-    return <div>Loading...</div>;
+  if (data == null) {
+    return undefined;
   }
 
-  return <DynComponent hallo="Plugin Demo" />;
+  const { module, plugin, context } = data;
+
+  return (
+    <DynamicComponent
+      context={context}
+      plugin={plugin}
+      module={module}
+    ></DynamicComponent>
+  );
 };
+
+ExtensionPoint.Content = ExtensionPointContent;
+
+export { ExtensionPoint };
