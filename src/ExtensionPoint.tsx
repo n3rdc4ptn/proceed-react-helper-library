@@ -26,20 +26,26 @@ const ExtensionPoint = ({
   extensionPoint,
   data,
   children,
+  plugin,
 }: {
   extensionPoint: string;
-  data: PluginUIContextData;
+  plugin?: Manifest;
+  data?: PluginUIContextData;
   children?: React.ReactNode;
 }) => {
-  const [isLoading, setIsLoading] = React.useState(true);
-  const [plugins, setPlugins] = React.useState<Manifest[]>([]);
+  const [isLoading, setIsLoading] = React.useState(plugin == null);
+  const [plugins, setPlugins] = React.useState<Manifest[]>(
+    plugin ? [plugin] : []
+  );
 
-  React.useEffect(() => {
-    getPluginsForExtensionPoint(extensionPoint).then((plugins) => {
-      setIsLoading(false);
-      setPlugins(plugins);
-    });
-  }, []);
+  if (plugin == null) {
+    React.useEffect(() => {
+      getPluginsForExtensionPoint(extensionPoint).then((plugins) => {
+        setIsLoading(false);
+        setPlugins(plugins);
+      });
+    }, []);
+  }
 
   if (isLoading) {
     return <div>Loading...</div>;

@@ -2,18 +2,15 @@
 import { PluginUIContext } from "proceed-plugin-core-library";
 import React, { ComponentType } from "react";
 import useDynamicScript from "./useDynamicScript";
-import {
-  WebpackRemoteContainer,
-  getContainer,
-} from "@module-federation/utilities";
+import { getContainer } from "@module-federation/utilities";
 
-function loadComponent(remoteUrl: string, scope: string, module: string) {
+function loadComponent(pluginBundle: string, module: string) {
   return async () => {
     // eslint-disable-next-line no-undef
     await __webpack_init_sharing__("default");
-    await __webpack_init_sharing__(scope);
+    await __webpack_init_sharing__(pluginBundle);
 
-    const container = await getContainer(scope);
+    const container = await getContainer(pluginBundle);
 
     if (container) {
       // eslint-disable-next-line no-undef
@@ -23,7 +20,7 @@ function loadComponent(remoteUrl: string, scope: string, module: string) {
       const Module = factory();
       return Module;
     } else {
-      console.log("Plugin " + scope + " not found");
+      console.log("Plugin " + pluginBundle + " not found");
       return null;
     }
   };
@@ -32,10 +29,10 @@ function loadComponent(remoteUrl: string, scope: string, module: string) {
 const componentCache = new Map();
 export const useFederatedComponent = (
   remoteUrl: string,
-  scope: any,
+  pluginBundle: any,
   module: string
 ) => {
-  const key = `${remoteUrl}-${scope}-${module}`;
+  const key = `${remoteUrl}-${pluginBundle}-${module}`;
   const [Component, setComponent] = React.useState<ComponentType<{
     context: PluginUIContext;
   }> | null>(null);
@@ -49,7 +46,7 @@ export const useFederatedComponent = (
 
   React.useEffect(() => {
     if (ready && !Component) {
-      const Comp = React.lazy(loadComponent(remoteUrl, scope, module));
+      const Comp = React.lazy(loadComponent(pluginBundle, module));
       componentCache.set(key, Comp);
       setComponent(Comp);
     }

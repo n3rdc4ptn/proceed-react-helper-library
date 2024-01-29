@@ -14,7 +14,9 @@ export async function getPlugins() {
   return plugins;
 }
 
-export async function getPluginsForExtensionPoint(extensionpoint: string) {
+export async function getPluginsForExtensionPoint(
+  extensionpoint: string
+): Promise<Manifest[]> {
   const plugins = (await getPlugins())
     .map((plugin) => ({
       ...plugin,

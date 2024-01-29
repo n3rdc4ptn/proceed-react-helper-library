@@ -18,12 +18,15 @@ export const DynamicComponent: React.FC<DynamicComponentProps> = ({
   context,
 }) => {
   const url = `${pluginServer}/plugins/${plugin.bundle}/remoteEntry.js`;
-  const scope = plugin.name;
+  const pluginBundle = plugin.bundle.replaceAll(".", "_");
   const moduleName = module.module ?? "";
+
+  console.log(url);
+  console.log(pluginBundle);
 
   const { Component: DynComponent } = useFederatedComponent(
     url,
-    scope,
+    pluginBundle,
     moduleName
   );
 
